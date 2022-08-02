@@ -25,10 +25,10 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
     elif dockerfile != None:
         dockerfile_path = dockerfile
     elif dockerfile_contents != None:
-        pre_command += "echo {} | ".format(shlex.quote(dockerfile_contents))
+        pre_command += f"echo {shlex.quote(dockerfile_contents)} | "
         dockerfile_path = '-'
     else:
-        dockerfile_path = context + '/Dockerfile'
+        dockerfile_path = f'{context}/Dockerfile'
 
     registry_secret = registry_secret or kubectl_build_registry_secret()
     command = ['kubectl', 'build', '--context', k8s_context()]
@@ -36,7 +36,7 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
     if registry_secret:
         command += ['--registry-secret', registry_secret]
     for arg, value in build_args.items():
-        command += ['--build-arg', arg + '=' + value]
+        command += ['--build-arg', f'{arg}={value}']
     if target:
         command += ['--target', target]
     if extra_tag:
@@ -81,25 +81,23 @@ def image_build(*args, **kwargs):
 
 def kubectl_build_enable(v=None):
     """Activate kubectl build"""
-    if v != None:
-        os.environ['KUBECTL_BUILD_ENABLE'] = str(v)
-        return to_bool(v)
-    else:
+    if v is None:
         return to_bool(os.environ.get('KUBECTL_BUILD_ENABLE', 'on'))
+    os.environ['KUBECTL_BUILD_ENABLE'] = str(v)
+    return to_bool(v)
 
 def kubectl_build_registry_secret(v=None):
     """Set/Get kubectl build registry secret"""
-    if v != None:
-        os.environ['KUBECTL_BUILD_REGISTRY_SECRET'] = str(v)
-        return str(v)
-    else:
+    if v is None:
         return os.environ.get('KUBECTL_BUILD_REGISTRY_SECRET', 'docker-registry')
+    os.environ['KUBECTL_BUILD_REGISTRY_SECRET'] = str(v)
+    return str(v)
 
 def to_bool(value):
     """Convert a string to a boolean"""
     v = str(value).strip().lower()
-    if v in ['on', 'true', 'yes', '1']:
+    if v in {'on', 'true', 'yes', '1'}:
         return True
-    if v in ['off', 'false', 'no', '0']:
+    if v in {'off', 'false', 'no', '0'}:
         return False
-    fail('Unsupported boolean values: ' + str(value))
+    fail(f'Unsupported boolean values: {str(value)}')

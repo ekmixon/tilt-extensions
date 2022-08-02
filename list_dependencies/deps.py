@@ -21,7 +21,7 @@ def get_node_dependencies():
         manifest = resInfo["Manifest"]
         resName = manifest["Name"]
         resDeps = manifest["ResourceDependencies"]
-        if resDeps == None:
+        if resDeps is None:
             resDeps = []
         dependencies[resName] = resDeps
 
@@ -54,11 +54,7 @@ def keys_same(mapA, mapB):
 
 def find_blocking(node, dependencies, ready):
     node_deps = dependencies[node]
-    node_pending = []
-    for i in node_deps:
-        if not ready[i]:
-            node_pending.append(i)
-    return node_pending
+    return [i for i in node_deps if not ready[i]]
 
 def print_blocking(dependencies, ready):
     print("---- Resources waiting for dependencies ----")
